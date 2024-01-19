@@ -1,19 +1,22 @@
-/* eslint-disable no-continue */
 /* eslint-disable no-param-reassign */
+/* eslint-disable no-continue */
 class UnionFind {
   constructor(size) {
     this.parent = new Array(size);
+    this.rank = new Array(size);
 
     for (let i = 0; i < size; i += 1) {
       this.parent[i] = i;
+      this.rank[i] = 0;
     }
+
+    this.rank[1] = Infinity;
   }
 
   find(x) {
     if (this.parent[x] !== x) {
       this.parent[x] = this.find(this.parent[x]);
     }
-
     return this.parent[x];
   }
 
@@ -21,17 +24,20 @@ class UnionFind {
     const rootX = this.find(x);
     const rootY = this.find(y);
 
-    this.parent[rootY] = rootX;
+    if (rootX !== rootY) {
+      if (this.rank[rootX] < this.rank[rootY]) {
+        this.parent[rootX] = rootY;
+      } else if (this.rank[rootX] > this.rank[rootY]) {
+        this.parent[rootY] = rootX;
+      } else {
+        this.parent[rootY] = rootX;
+        this.rank[rootX] += 1;
+      }
+    }
   }
 
   getUniques() {
     return this.parent.filter((el, index) => (index !== 0 && el === index));
-  }
-
-  compress() {
-    for (let i = 1; i < this.parent.length; i += 1) {
-      this.parent[i] = this.find(this.parent[i]);
-    }
   }
 }
 
@@ -65,6 +71,8 @@ function solution(n, roads) {
 
         if (index !== null) {
           const value = stack[index];
+          const rootValue = uf.find(value);
+          uf.rank[rootValue] = Infinity;
 
           for (let i = index + 1; i < stack.length; i += 1) {
             uf.union(value, stack[i]);
