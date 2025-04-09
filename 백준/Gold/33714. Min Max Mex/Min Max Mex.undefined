@@ -1,0 +1,81 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define FASTIO                 \
+  ios::sync_with_stdio(false); \
+  cin.tie(nullptr);            \
+  cout.tie(nullptr);
+
+#define F(i, a, b) for (int i = a; i < b; i += 1)
+#define FR(i, b, a) for (int i = b; i >= a; i -= 1)
+#define FOF(it, vec) for (auto &it : vec)
+#define endl '\n'
+#define ALL(v) v.begin(), v.end()
+#define DEBUG_VAR(var) cout << #var << ": " << (var) << endl;
+// #define DEBUG
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+int main() {
+  FASTIO;
+  int n, k;
+  cin >> n >> k;
+  vector<int> a(n);
+  F(i, 0, n) cin >> a[i];
+  a.push_back(-1);
+  sort(ALL(a));
+  vector<pii> comp;
+  int curNum = -1;
+  int curCounts = 0;
+  F(i, 0, n + 1) {
+    if (a[i] == curNum) {
+      curCounts++;
+    } else {
+      comp.push_back({curNum, curCounts});
+      curNum = a[i];
+      curCounts = 1;
+    }
+  }
+  if (curCounts > 0) comp.push_back({curNum, curCounts});
+  n = comp.size();
+
+  int mexMin = -1;
+  if (comp[1].first >= 1) {
+    mexMin = 0;
+  } else if (comp[1].second <= k) {
+    mexMin = comp[1].first;
+  } else {
+    F(i, 2, n) {
+      int diff = comp[i].first - comp[i - 1].first - 1;
+      if (diff > 0) {
+        mexMin = comp[i - 1].first + 1;
+        break;
+      }
+
+      if (comp[i].second <= k) {
+        mexMin = comp[i].first;
+        break;
+      }
+    }
+  }
+  if (mexMin == -1) mexMin = comp[n - 1].first + 1;
+
+  int mexMax = -1;
+  F(i, 1, n) {
+    int diff = comp[i].first - comp[i - 1].first - 1;
+    k -= diff;
+    if (k >= 0) continue;
+    mexMax = comp[i].first + k;
+    if (mexMax != -1) break;
+  }
+  if (mexMax == -1) {
+    mexMax = comp[n - 1].first + k + 1;
+  }
+
+  cout << mexMin << endl << mexMax;
+
+  return 0;
+}
