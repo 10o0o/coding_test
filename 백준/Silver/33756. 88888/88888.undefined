@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define FASTIO                 \
+  ios::sync_with_stdio(false); \
+  cin.tie(nullptr);            \
+  cout.tie(nullptr);
+
+#define FOR(i, a, b) for (int i = a; i < b; i += 1)
+#define FRE(i, b, a) for (int i = b; i >= a; i -= 1)
+#define FOF(it, vec) for (auto &it : vec)
+#define endl '\n'
+#define ALL(v) v.begin(), v.end()
+#define DEBUG_VAR(var) cout << #var << ": " << (var) << endl;
+// #define DEBUG
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+ll get8Num(ll n) {
+  ll ret = 0;
+  while (ret <= n) {
+    ret = ret * 10 + 8;
+  }
+  ret -= 8;
+  ret /= 10;
+  return ret;
+}
+
+void solve() {
+  ll n;
+  cin >> n;
+  int c = 8;
+  while (n) {
+    ll eightNum = get8Num(n);
+    if (eightNum == 0) break;
+    int d = n / eightNum;
+    n -= d * eightNum;
+    c -= d;
+    if (c <= 0) break;
+  }
+
+  if (n || (c < 0)) {
+    cout << "No" << endl;
+  } else {
+    cout << "Yes" << endl;
+  }
+}
+
+int main() {
+  FASTIO;
+  int t;
+  cin >> t;
+  while (t--) solve();
+}
