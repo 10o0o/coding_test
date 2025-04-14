@@ -1,0 +1,113 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define FASTIO                 \
+  ios::sync_with_stdio(false); \
+  cin.tie(nullptr);            \
+  cout.tie(nullptr);
+
+#define FOR(i, a, b) for (int i = a; i < b; i += 1)
+#define FRE(i, b, a) for (int i = b; i >= a; i -= 1)
+#define FOF(it, vec) for (auto &it : vec)
+#define endl '\n'
+#define ALL(v) v.begin(), v.end()
+#define DEBUG_VAR(var) cout << #var << ": " << (var) << endl;
+// #define DEBUG
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+class UnionFind {
+  vector<int> parent, rank;
+  int n;
+
+ public:
+  UnionFind(int n) : n(n) {
+    parent.resize(n);
+    rank.resize(n, 0);
+    FOR(i, 0, n) parent[i] = i;
+  }
+
+  int find(int x) {
+    if (parent[x] != x) parent[x] = find(parent[x]);
+    return parent[x];
+  }
+
+  void merge(int x, int y) {
+    int rootX = find(x);
+    int rootY = find(y);
+    if (rootX != rootY) {
+      if (rank[rootX] < rank[rootY]) {
+        parent[rootX] = rootY;
+      } else if (rank[rootX] > rank[rootY]) {
+        parent[rootY] = rootX;
+      } else {
+        parent[rootY] = rootX;
+        rank[rootX]++;
+      }
+    }
+  }
+};
+
+int main() {
+  FASTIO;
+  int n;
+  cin >> n;
+  vector<vector<pair<int, ll>>> graph(n);
+  vector<unordered_set<int>> hasEdge(n);
+  vector<int> indegree(n, 0);
+
+  FOR(i, 0, n - 1) {
+    int u, v, w;
+    cin >> u >> v >> w;
+    u--, v--;
+    graph[u].push_back({v, w});
+    graph[v].push_back({u, w});
+    hasEdge[u].insert(v);
+    hasEdge[v].insert(u);
+    indegree[u]++;
+    indegree[v]++;
+  }
+
+  FOR(i, 0, n) if (indegree[i] == n - 1) {
+    cout << -1;
+    return 0;
+  }
+
+  FOF(i, graph) sort(ALL(i), [](const auto &a, const auto &b) { return a.second < b.second; });
+  ll res = 0;
+  vector<tuple<ll, int, int>> edges;
+  UnionFind uf(n);
+  vector<vector<pll>> memo(n);
+  FOR(i, 0, n) {
+    FOF(edge1, graph[i]) FOF(edge2, graph[i]) {
+      if (edge1.first == edge2.first) continue;
+      if (hasEdge[edge1.first].count(edge2.first)) continue;
+      edges.push_back({edge1.second + edge2.second, edge1.first, edge2.first});
+      memo[edge1.first].push_back({edge1.second + edge2.second, edge2.first});
+      break;
+    }
+  }
+
+  FOR(i, 0, n) sort(ALL(memo[i]));
+  FOR(i, 0, n) {
+    FOF(edge, graph[i]) FOF(mergedEdge, memo[i]) {
+      if (hasEdge[edge.first].count(mergedEdge.second)) continue;
+      edges.push_back({edge.second + mergedEdge.first, edge.first, mergedEdge.second});
+      break;
+    }
+  }
+
+  sort(ALL(edges));
+
+  FOF(edge, edges) {
+    auto [w, u, v] = edge;
+    if (hasEdge[u].count(v)) continue;
+    if (uf.find(u) == uf.find(v)) continue;
+    uf.merge(u, v);
+    res += w;
+  }
+
+  cout << res;
+}
