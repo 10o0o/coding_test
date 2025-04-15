@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define FASTIO                 \
+  ios::sync_with_stdio(false); \
+  cin.tie(nullptr);            \
+  cout.tie(nullptr);
+
+#define FOR(i, a, b) for (int i = a; i < b; i += 1)
+#define FRE(i, b, a) for (int i = b; i >= a; i -= 1)
+#define FOF(it, vec) for (auto &it : vec)
+#define endl '\n'
+#define ALL(v) v.begin(), v.end()
+#define DEBUG_VAR(var) cout << #var << ": " << (var) << endl;
+// #define DEBUG
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+int main() {
+  FASTIO;
+  int n;
+  cin >> n;
+  vector<vector<int>> matrix(2, vector<int>(n));
+  FOR(i, 0, 2) FOR(j, 0, n) cin >> matrix[i][j];
+  vector<int> sums(n);
+  FOR(i, 0, n) sums[i] = matrix[0][i] + matrix[1][i];
+  bool isAllTwo = true;
+  bool isZeroExist = false;
+  FOR(i, 0, n) {
+    if (sums[i] != 2) isAllTwo = false;
+    if (sums[i] == 0) isZeroExist = true;
+  }
+  if (isAllTwo) {
+    cout << 2 << endl;
+    return 0;
+  }
+  if (isZeroExist) {
+    cout << 0 << endl;
+    return 0;
+  }
+  FOR(i, 1, n) {
+    if (sums[i - 1] == 2 || sums[i] == 2) continue;
+    if ((matrix[0][i] == matrix[1][i - 1]) && (matrix[1][i] == matrix[0][i - 1])) {
+      cout << 0 << endl;
+      return 0;
+    }
+  }
+  cout << 1 << endl;
+  return 0;
+}
