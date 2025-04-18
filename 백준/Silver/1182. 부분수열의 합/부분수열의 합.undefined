@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define FASTIO                 \
+  ios::sync_with_stdio(false); \
+  cin.tie(nullptr);            \
+  cout.tie(nullptr);
+
+#define FOR(i, a, b) for (int i = a; i < b; i += 1)
+#define FRE(i, b, a) for (int i = b; i >= a; i -= 1)
+#define FOF(it, vec) for (auto &it : vec)
+#define endl '\n'
+#define ALL(v) v.begin(), v.end()
+#define DEBUG_VAR(var) cout << #var << ": " << (var) << endl;
+// #define DEBUG
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+
+int n, S;
+vector<int> a;
+ll ans = 0;
+
+void go(int idx, int sum, int taken) {
+  if (idx == n) {
+    if (taken > 0 && sum == S) ans++;
+    return;
+  }
+  go(idx + 1, sum + a[idx], taken + 1);
+  go(idx + 1, sum, taken);
+}
+
+int main() {
+  FASTIO;
+  cin >> n >> S;
+  a.resize(n);
+  FOR(i, 0, n) cin >> a[i];
+  go(0, 0, 0);
+  cout << ans;
+  return 0;
+}
