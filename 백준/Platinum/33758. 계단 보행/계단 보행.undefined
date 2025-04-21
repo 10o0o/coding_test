@@ -18,85 +18,61 @@ typedef long long ll;
 typedef pair<int, int> pii;
 typedef pair<ll, ll> pll;
 
-typedef pair<int, vector<int>> group;
+void go(vector<unordered_map<int, vector<int>>>& adj, vector<int>& dists, int N, int M,
+        vector<unordered_set<int>>& visited) {
+  queue<tuple<int, int, int>> q;
+  q.push({1, 0, -1});
+
+  while (!q.empty()) {
+    auto [node, dist, prevW] = q.front();
+    q.pop();
+
+    if (prevW != -1) {
+      if (dists[node] == -1 || dists[node] > dist) {
+        dists[node] = dist;
+      }
+    }
+
+    vector<int> nextWs = {};
+    if (prevW == -1) {
+      FOF(it, adj[node]) nextWs.push_back(it.first);
+    } else {
+      nextWs.push_back(prevW + 1);
+      nextWs.push_back(prevW - 1);
+    }
+
+    FOF(nextW, nextWs) {
+      if (nextW < 1 || nextW > M) continue;
+      if (visited[node].find(nextW) != visited[node].end()) continue;
+      visited[node].insert(nextW);
+      vector<int>& nexts = adj[node][nextW];
+      FOF(nt, nexts) {
+        if (dists[nt] == -1 || dists[nt] > dist + 1) {
+          dists[nt] = dist + 1;
+        }
+
+        q.push({nt, dist + 1, nextW});
+      }
+    }
+  }
+}
 
 int main() {
   FASTIO;
-  int n, m;
-  cin >> n >> m;
-  vector<vector<pii>> graph(n + 1);
-  FOR(i, 0, m) {
+  int N, M;
+  cin >> N >> M;
+  vector<unordered_map<int, vector<int>>> adj(N + 1);
+  FOR(i, 0, M) {
     int u, v, w;
     cin >> u >> v >> w;
-    graph[u].push_back({v, w});
-    graph[v].push_back({u, w});
+    adj[u][w].push_back(v);
+    adj[v][w].push_back(u);
   }
 
-  vector<vector<group>> groups(n + 1);
-  FOR(u, 1, n + 1) {
-    auto forwards = graph[u];
-    sort(ALL(forwards), [](const pii& a, const pii& b) { return a.second < b.second; });
-
-    FOF(it, forwards) {
-      auto& [v, w] = it;
-      if (groups[u].empty() || groups[u].back().first != w) {
-        groups[u].push_back({w, {v}});
-      } else {
-        groups[u].back().second.push_back(v);
-      }
-    }
-  }
-
-  vector<unordered_map<int, int>> dists(n + 1);
-  vector<int> stairDists(n + 1, -1);
-  queue<tuple<int, int, int>> q;
-
-  FOF(it, graph[1]) {
-    auto& [v, w] = it;
-    dists[v][w] = 1;
-    q.push({v, w, 1});
-    stairDists[v] = 1;
-  }
-
-  while (!q.empty()) {
-    auto [u, prevW, accDist] = q.front();
-    q.pop();
-    if (dists[u][prevW] != accDist) continue;
-
-    vector<int> nexts = {prevW - 1, prevW + 1};
-    FOF(w2, nexts) {
-      if (w2 < 1 || w2 > m) continue;
-      vector<group>& group = groups[u];
-      int left = 0, right = (int)group.size() - 1;
-      while (left <= right) {
-        int mid = (left + right) / 2;
-        if (group[mid].first < w2) {
-          left = mid + 1;
-        } else if (group[mid].first > w2) {
-          right = mid - 1;
-        } else {
-          left = mid;
-          break;
-        }
-      }
-
-      if (left < group.size() && group[left].first == w2) {
-        FOF(v, group[left].second) {
-          int newDist = accDist + 1;
-          if (!dists[v].count(w2)) {
-            dists[v][w2] = newDist;
-            q.push({v, w2, newDist});
-
-            if (stairDists[v] == -1 || newDist < stairDists[v]) {
-              stairDists[v] = newDist;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  FOR(i, 1, n + 1) cout << stairDists[i] << " ";
+  vector<int> dist(N + 1, -1);
+  vector<unordered_set<int>> visited(N + 1);
+  go(adj, dist, N, M, visited);
+  FOR(i, 1, N + 1) cout << dist[i] << " ";
 
   return 0;
 }
