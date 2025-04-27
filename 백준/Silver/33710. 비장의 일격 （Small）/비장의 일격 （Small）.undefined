@@ -17,6 +17,7 @@ using namespace std;
 typedef long long ll;
 typedef pair<int, int> pii;
 typedef pair<ll, ll> pll;
+typedef tuple<int, int, int> tiii;
 
 int main() {
   FASTIO;
@@ -24,49 +25,28 @@ int main() {
   string S;
   cin >> N >> K >> S;
   K = min(K, 25);
-  int intX = 'X' - 'A';
   vector<vector<int>> indexMap(26);
   FOR(i, 0, N) indexMap[S[i] - 'A'].push_back(i);
-  vector<vector<int>> memo(26, vector<int>(K + 1, N));
-  vector<vector<int>> dp(N + 1, vector<int>(K + 1, -1));
-  FOR(i, 0, K + 1) dp[0][i] = 0;
-  FOR(i, 1, N + 1) {
-    FOR(j, 0, K + 1) {
-      if (dp[i][j] == -1) {
-        dp[i][j] = dp[i - 1][j] + 1;
-      } else {
-        dp[i][j] = min(dp[i][j], dp[i - 1][j] + 1);
-      }
+  vector<vector<int>> dp(N + 1, vector<int>(K + 1, 0));
 
-      if (i == N) continue;
+  FOR(i, 1, N + 1) FOR(j, 0, K + 1) {
+    if (S[i - 1] != 'X') {
+      const vector<int>& indices = indexMap[S[i - 1] - 'A'];
+      if (j != K) {
+        FOF(index, indices) {
+          if (index >= i - 1) break;
 
-      int charInt = S[i] - 'A';
-      bool isX = charInt == intX;
-
-      if (!isX) {
-        if (memo[charInt][j] <= dp[i][j]) continue;
-        memo[charInt][j] = min(memo[charInt][j], dp[i][j] + N - i);
-      }
-
-      if ((j == 0) || isX) continue;
-      const vector<int>& indexes = indexMap[charInt];
-      FOR(k, 0, indexes.size()) {
-        int index = indexes[k];
-        if (index >= i) break;
-        if (dp[i + 1][j - 1] == -1) {
-          dp[i + 1][j - 1] = dp[index][j];
-        } else {
-          dp[i + 1][j - 1] = min(dp[i + 1][j - 1], dp[index][j]);
+          dp[i][j] = max(dp[i][j], dp[index][j + 1] + i - index);
         }
       }
     }
+
+    dp[i][j] = max(dp[i][j], dp[i - 1][j]);
   }
 
-  int ans = N + 1;
-  FOR(j, 0, K + 1) {
-    if (dp[N][j] == -1) continue;
-    ans = min(ans, dp[N][j]);
-  }
+  int len = 0;
+  FOR(j, 0, K + 1) len = max(len, dp[N][j]);
+  cout << N - len << endl;
 
-  cout << ans << endl;
+  return 0;
 }
