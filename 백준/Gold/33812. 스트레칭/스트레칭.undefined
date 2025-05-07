@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define FASTIO                 \
+  ios::sync_with_stdio(false); \
+  cin.tie(nullptr)
+
+int main() {
+  FASTIO;
+  int N, K, R;
+  cin >> N >> K >> R;
+
+  vector<char> banned(N, 0);
+  vector<int> inter;
+  bool hasUnsat = false;
+
+  while (R--) {
+    vector<int> a(K);
+    for (int &x : a) {
+      cin >> x;
+      --x;
+    }
+    string s;
+    cin >> s;
+
+    if (s == "unsatisfied") {
+      if (!hasUnsat) {
+        inter.assign(a.begin(), a.end());
+        sort(inter.begin(), inter.end());
+      } else {
+        vector<int> nxt;
+        sort(a.begin(), a.end());
+        set_intersection(inter.begin(), inter.end(), a.begin(), a.end(), back_inserter(nxt));
+        inter.swap(nxt);
+      }
+      hasUnsat = true;
+    } else {
+      for (int x : a) banned[x] = 1;
+    }
+  }
+
+  vector<int> cand;
+  if (hasUnsat) {
+    for (int x : inter)
+      if (!banned[x]) cand.push_back(x);
+  } else {  // unsatisfied가 하나도 없었던 경우
+    for (int i = 0; i < N; ++i)
+      if (!banned[i]) cand.push_back(i);
+  }
+
+  int M = cand.size();
+  if (M == 1) {
+    cout << 0 << '\n';
+    return 0;
+  }
+
+  long long ans = 0;
+  while (M > 1) {
+    if (K >= (M + 1) / 2)
+      M = (M + 1) / 2;
+    else
+      M -= K;
+    ++ans;
+  }
+  cout << ans << '\n';
+  return 0;
+}
