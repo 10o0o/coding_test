@@ -1,66 +1,72 @@
 #include <bits/stdc++.h>
 using namespace std;
+
 #define FASTIO                 \
   ios::sync_with_stdio(false); \
-  cin.tie(nullptr)
+  cin.tie(nullptr);            \
+  cout.tie(nullptr);
+
+#define FOR(i, a, b) for (int i = a; i < b; i += 1)
+#define FRE(i, b, a) for (int i = b; i >= a; i -= 1)
+#define FOF(it, vec) for (auto& it : vec)
+#define endl '\n'
+#define ALL(v) v.begin(), v.end()
+#define DEBUG_VAR(var) cout << #var << ": " << (var) << endl;
+// #define DEBUG
+
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
 
 int main() {
   FASTIO;
   int N, K, R;
   cin >> N >> K >> R;
-
-  vector<char> banned(N, 0);
-  vector<int> inter;
-  bool hasUnsat = false;
+  bool flag = false;
+  unordered_set<int> unsatisfiedGroup;
+  vector<bool> satisfied(N, false);
 
   while (R--) {
-    vector<int> a(K);
-    for (int &x : a) {
-      cin >> x;
-      --x;
-    }
-    string s;
-    cin >> s;
-
-    if (s == "unsatisfied") {
-      if (!hasUnsat) {
-        inter.assign(a.begin(), a.end());
-        sort(inter.begin(), inter.end());
+    vector<int> A(K);
+    FOR(i, 0, K) cin >> A[i];
+    FOR(i, 0, K) A[i]--;
+    string S;
+    cin >> S;
+    if (S == "unsatisfied") {
+      if (!flag) {
+        FOR(i, 0, K) { unsatisfiedGroup.insert(A[i]); }
       } else {
-        vector<int> nxt;
-        sort(a.begin(), a.end());
-        set_intersection(inter.begin(), inter.end(), a.begin(), a.end(), back_inserter(nxt));
-        inter.swap(nxt);
+        unordered_set<int> temp;
+        FOR(i, 0, K) if (unsatisfiedGroup.count(A[i])) temp.insert(A[i]);
+        unsatisfiedGroup = temp;
       }
-      hasUnsat = true;
+      flag = true;
     } else {
-      for (int x : a) banned[x] = 1;
+      FOR(i, 0, K) satisfied[A[i]] = true;
     }
   }
 
-  vector<int> cand;
-  if (hasUnsat) {
-    for (int x : inter)
-      if (!banned[x]) cand.push_back(x);
-  } else {  // unsatisfied가 하나도 없었던 경우
-    for (int i = 0; i < N; ++i)
-      if (!banned[i]) cand.push_back(i);
+  int remainCounts = 0;
+  if (!flag) {
+    FOR(i, 0, N) if (!satisfied[i]) { remainCounts++; }
+  } else {
+    FOF(it, unsatisfiedGroup) {
+      if (!satisfied[it]) {
+        remainCounts++;
+      }
+    }
   }
 
-  int M = cand.size();
-  if (M == 1) {
-    cout << 0 << '\n';
-    return 0;
+  int div = min(K, N - K);
+  int ans = 0;
+  while (remainCounts > 1) {
+    if (remainCounts >= div * 2) {
+      remainCounts -= div;
+    } else {
+      remainCounts = (remainCounts + 1) / 2;
+    }
+    ans++;
   }
 
-  long long ans = 0;
-  while (M > 1) {
-    if (K >= (M + 1) / 2)
-      M = (M + 1) / 2;
-    else
-      M -= K;
-    ++ans;
-  }
-  cout << ans << '\n';
-  return 0;
+  cout << ans << endl;
 }
